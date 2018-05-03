@@ -44,6 +44,10 @@ class Kohonen2DLayer:
                 output_max = product
         return it_max
 
+    def find_best_neuron_by_cartesian_distance(self, x):  # potencjalnie wolne rozwiązanie w pythonie
+        return reduce(lambda max, pretender: pretender if pretender[0] > max[0] else max,
+                      map(lambda w, it: (abs(sum(w - x)), it), self.W, range(len(self.W))))[1]
+
     def distance_between_neurons(self, it_1, it_2):  # dla sievi o topoligi prostokątnej
         dist_x = (self.positions[it_1][0] - self.positions[it_2][0])
         dist_y = (self.positions[it_1][1] - self.positions[it_2][1])
