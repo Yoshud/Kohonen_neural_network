@@ -48,6 +48,7 @@ class Kohonen2DLayer:
 
     def find_best_neuron_by_cartesian_distance(self, x):  # potencjalnie wolne rozwiązanie w pythonie
         W = self.W.transpose()
+        # print(list(map(lambda w, it, x=x: (abs(cp.sum(w - x)), it), W, range(len(W)))))
         return reduce(lambda max, pretender: pretender if pretender[0] > max[0] else max,
                        map(lambda w, it, x=x: (abs(cp.sum(w - x)), it), W, range(len(W))))[1]
 
@@ -63,4 +64,4 @@ class Kohonen2DLayer:
         return sqrt(cp.sum((W_1 - W_2) ** 2))
 
     def number_of_neurons(self):
-        return len(self.W)
+        return len(self.W.transpose())

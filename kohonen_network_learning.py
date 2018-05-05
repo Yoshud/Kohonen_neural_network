@@ -41,9 +41,10 @@ class KohonenNetworkLearning:
 
 
 class KohonenNetworkGauss_nbh:
-    def __init__(self, data, network):
+    def __init__(self, data, network, if_by_dot_product = True):
         self.data = data
         self.network = network
+        self.by_dot_product = if_by_dot_product
 
     def randomize_data_indexes(self):
         one = list(range(0, len(self.data)))
@@ -61,8 +62,12 @@ class KohonenNetworkGauss_nbh:
             for index in self.randomize_data_indexes():
                 x = self.data[index].reshape(1, len(self.data[0]))
                 s = epoch / number_of_epochs
-                BMU = self.network.layers.find_best_neuron_by_cartesian_distance(x)
-                self.nbh_fun(x, BMU, s, 10)
+                if(self.by_dot_product):
+                    BMU = self.network.layers.find_best_neuron_by_dot_product(x)
+                else:
+                    BMU = self.network.layers.find_best_neuron_by_cartesian_distance(x)
+                # print(BMU)
+                self.nbh_fun(x, BMU, s, 30)
             print("epoch: " + str(epoch))
             print(self.network.layers.W.transpose()[0])
     def alpha_fun(self, s, a0=1., t=2.):
@@ -71,7 +76,7 @@ class KohonenNetworkGauss_nbh:
         else:
             return 0.
 
-    def deacresing_dist_fun(self, dist0, s, t=2.):
+    def deacresing_dist_fun(self, dist0, s, t=1.2):
         return self.alpha_fun(s, dist0, t)
 
     def nbh_fun(self, x, BMU, s, dist_0):
