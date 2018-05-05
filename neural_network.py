@@ -10,9 +10,9 @@ from scipy.special import expit
 
 
 class NeuralNetwork(ABC):
-    @abstractmethod
-    def compute(self, x):
-        pass
+    # @abstractmethod
+    # def compute(self, x):
+    #     pass
 
     def set_data(self, treining_set, test_set):
         self.treining_set = treining_set
@@ -44,7 +44,7 @@ class Kohonen2DNetwork(NeuralNetwork):
         self.set_structure(structure, attributes_in_data)
 
     def set_structure(self, structure, attributes_in_data):
-        self.layers = layer.KohonenLayer( attributes_in_data, structure)
+        self.layers = layer.Kohonen2DLayer(attributes_in_data, structure)
 
 #
 #     def compute(self, x):
