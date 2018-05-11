@@ -1,16 +1,10 @@
 import numpy as np
 from scipy.stats import norm
-# import cupy as cp
-# import matplotlib.pyplot as plt
-# import pandas as pd
-# import layer
-# import math
-# import neural_network
-# from functools import reduce
-# from abc import ABC, abstractmethod
-# from scipy.special import expit
+import copy
 
 
+# funktor pozwalający na ustawienie i potem zawsze zwracanie wartości funkcji Gaussa dla nastaw i danego punktu,
+# zawsze zwraca wartość z 1 w mean - służy do liczenia wpływu odległości
 class Gauss:
     def __init__(self, mean, std_dev):
         self.rv = norm(loc=mean, scale=std_dev)
@@ -20,32 +14,15 @@ class Gauss:
         return self.rv.pdf(x) / self.max_rv
 
 
-class KohonenNetworkLearning:
-    def __init__(self):
-        pass
-
-    def learning(self):
-        pass
-
-    def nbh_gaussian_fun(self, BMU, v, s):
-        pass
-
-    def nbh_simple_fun(self, BMU, v, s):
-        pass
-
-    def alpha_linear_fun(self, s):
-        pass
-
-    def alpha_exponential_fun(self, s):
-        pass
-
-
+# sieć SOM z funkcją Gaussa jako funkcją odległości i ustaloną funkcją dla learning rate, w późniejszych etapach projektu
+# ulegnie refaktoryzacji dla większej elastyczności (możliwość wyboru poszczególnych funkcji i ich parametrów)
 class KohonenNetworkGauss_nbh:
-    def __init__(self, data, network, if_by_dot_product = True):
+    def __init__(self, data, network, if_by_dot_product=True):
         self.data = data
         self.network = network
         self.by_dot_product = if_by_dot_product
 
+    # funcja zwracająca indeksy danych w losowej kolejności by móc później "karmić" sieć danymi w losowej kolejności
     def randomize_data_indexes(self):
         one = list(range(0, len(self.data)))
         second = list(np.random.rand(len(self.data)))
@@ -57,12 +34,18 @@ class KohonenNetworkGauss_nbh:
 
         return list(map(lambda el: int(el[0]), lista))
 
+    # główna część - algorytm uczenia się
+    # BMU - indeks najsilniej odpowiadającego neuronu
     def learning(self, number_of_epochs):
+
+        # służy do zapisywania stanów sieci w kolejnych epokach do późniejszej obserwacji
+        remember_network = [copy.deepcopy(self.network), ]
+
         for epoch in range(number_of_epochs):
             for index in self.randomize_data_indexes():
                 x = self.data[index].reshape(1, len(self.data[0]))
                 s = epoch / number_of_epochs
-                if(self.by_dot_product):
+                if (self.by_dot_product):
                     BMU = self.network.layers.find_best_neuron_by_dot_product(x)
                 else:
                     BMU = self.network.layers.find_best_neuron_by_cartesian_distance(x)
@@ -70,15 +53,25 @@ class KohonenNetworkGauss_nbh:
                 self.nbh_fun(x, BMU, s, 30)
             print("epoch: " + str(epoch))
             print(self.network.layers.W.transpose()[0])
-    def alpha_fun(self, s, a0=1., t=2.):
+            remember_network.append(copy.deepcopy(self.network))
+        return remember_network
+
+    # funkcja malejąca do learning rate
+    def alpha_fun(self, s, a0=1., t=2.0):
         if (s != 1):
             return a0 * np.exp(t - t / (1 - s))
         else:
             return 0.
 
+    # funkcja ustalająca malejący się rozmiar zasięgu funkcji sąsiedstwa
     def deacresing_dist_fun(self, dist0, s, t=1.2):
         return self.alpha_fun(s, dist0, t)
 
+    # nazwa jest nie dokładna. Jest to funkcja sąsiedstwa, oraz algorytm uczenia neronu na jej podstawie:
+    # x - wektor wejściowy
+    # BMU - indeks neuronu najmocniej odpowiadającego
+    # s - zmienna informująca o tym ile zostało do zakończenia epok
+    # dist_0 - zasięg w "neuronach" początkowy - zasięg definiowany jako odchylenie standardowe funkcji Gaussa
     def nbh_fun(self, x, BMU, s, dist_0):
         layer = self.network.layers
         W = layer.W.transpose()
@@ -87,4 +80,4 @@ class KohonenNetworkGauss_nbh:
         for v in range(layer.number_of_neurons()):
             dist = layer.cartesian_distance_between_neurons(BMU, v)
             k = gauss.val(dist)
-            W[v] = W[v] + self.alpha_fun(s, 0.2, 2.) * k * (x - W[v])[0]
+            W[v] = W[v] + self.alpha_fun(s, 0.2, 0.7) * k * (x - W[v])[0]
