@@ -1,12 +1,6 @@
 import csv
 import numpy as np
 import pandas as pd
-import neural_network
-import kohonen_network_learning
-
-import matplotlib as plt
-import itertools
-
 
 DATA_LABELS = {
     "age": 0,

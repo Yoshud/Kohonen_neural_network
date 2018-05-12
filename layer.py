@@ -1,6 +1,5 @@
 import cupy as cp #biblioteka działająca jak numpy, tylko że wykonująca operacje na GPU na rdzenach CUDA
-
-import numpy as np
+import numpy as np #najpopularniejsza pythonowa biblioteka do operacji matematycznych głównie macierzowych
 from math import floor, sqrt
 from functools import reduce
 
@@ -56,7 +55,7 @@ class Kohonen2DLayer:
         return reduce(lambda max, pretender: pretender if pretender[0] > max[0] else max,
                       map(lambda w, it, x=x: (abs(cp.sum(w - x)), it), W, range(len(W))))[1]
 
-    # zakłada prostokątną architekrure sieci, i liczy odległość między neuronamiw "przestrzeni neuronów"
+    # zakłada prostokątną architekture sieci, i liczy odległość między neuronami w "przestrzeni neuronów"
     def cartesian_distance_between_neurons(self, it_1, it_2):  # dla sieci o topoligi prostokątnej
         dist_x = (self.positions[it_1][0] - self.positions[it_2][0])
         dist_y = (self.positions[it_1][1] - self.positions[it_2][1])

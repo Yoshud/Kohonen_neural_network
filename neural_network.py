@@ -1,10 +1,9 @@
-import layer
+import layer  # plik widoczny niżej
 from functools import reduce
-from abc import ABC, abstractmethod
+from abc import ABC, abstractmethod  # funkcje abstrakcyjne w Pythonie
 
 
 class NeuralNetwork(ABC):
-    # @abstractmethod
 
     def set_data(self, treining_set, test_set):
         self.treining_set = treining_set
@@ -32,7 +31,7 @@ class MultiLayerNetwork(NeuralNetwork):
     def compute(self, x):
         return reduce(lambda returned, layer: layer.compute(returned), self.layers, x)
 
-
+#Sieć typu SOM, ma zaimplementowany algorytm uczenia jej używający
 class Kohonen2DNetwork(NeuralNetwork):
     def __init__(self, structure, attributes_in_data):
         self.set_structure(structure, attributes_in_data)

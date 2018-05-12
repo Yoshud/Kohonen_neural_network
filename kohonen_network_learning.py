@@ -1,6 +1,6 @@
 import numpy as np
-from scipy.stats import norm
-import copy
+from scipy.stats import norm  # potrzebne do prostej i szybkiej implementacji funkcji Gaussa
+import copy  # używane do głębokich kopii sieci
 
 
 # funktor pozwalający na ustawienie i potem zawsze zwracanie wartości funkcji Gaussa dla nastaw i danego punktu,
@@ -17,10 +17,12 @@ class Gauss:
 # sieć SOM z funkcją Gaussa jako funkcją odległości i ustaloną funkcją dla learning rate, w późniejszych etapach projektu
 # ulegnie refaktoryzacji dla większej elastyczności (możliwość wyboru poszczególnych funkcji i ich parametrów)
 class KohonenNetworkGauss_nbh:
-    def __init__(self, data, network, if_by_dot_product=True):
+    def __init__(self, data, network, dist_0=20, alpha_0=0.1, if_by_dot_product=False):
         self.data = data
         self.network = network
         self.by_dot_product = if_by_dot_product
+        self.dist_0 = dist_0
+        self.a_0 = alpha_0
 
     # funcja zwracająca indeksy danych w losowej kolejności by móc później "karmić" sieć danymi w losowej kolejności
     def randomize_data_indexes(self):
@@ -31,7 +33,6 @@ class KohonenNetworkGauss_nbh:
         for el in x.transpose():
             lista.append((el[0], el[1]))
         lista.sort(key=lambda x: x[1])
-
         return list(map(lambda el: int(el[0]), lista))
 
     # główna część - algorytm uczenia się
@@ -50,7 +51,7 @@ class KohonenNetworkGauss_nbh:
                 else:
                     BMU = self.network.layers.find_best_neuron_by_cartesian_distance(x)
                 # print(BMU)
-                self.nbh_fun(x, BMU, s, 30)
+                self.nbh_fun(x, BMU, s, self.dist_0)
             print("epoch: " + str(epoch))
             print(self.network.layers.W.transpose()[0])
             remember_network.append(copy.deepcopy(self.network))
@@ -63,11 +64,11 @@ class KohonenNetworkGauss_nbh:
         else:
             return 0.
 
-    # funkcja ustalająca malejący się rozmiar zasięgu funkcji sąsiedstwa
+    # funkcja ustalająca zmniejszający się rozmiar zasięgu funkcji sąsiedstwa
     def deacresing_dist_fun(self, dist0, s, t=1.2):
         return self.alpha_fun(s, dist0, t)
 
-    # nazwa jest nie dokładna. Jest to funkcja sąsiedstwa, oraz algorytm uczenia neronu na jej podstawie:
+    # nazwa jest niedokładna. Jest to funkcja sąsiedstwa, oraz algorytm uczenia neuronu na jej podstawie:
     # x - wektor wejściowy
     # BMU - indeks neuronu najmocniej odpowiadającego
     # s - zmienna informująca o tym ile zostało do zakończenia epok
@@ -80,4 +81,4 @@ class KohonenNetworkGauss_nbh:
         for v in range(layer.number_of_neurons()):
             dist = layer.cartesian_distance_between_neurons(BMU, v)
             k = gauss.val(dist)
-            W[v] = W[v] + self.alpha_fun(s, 0.2, 0.7) * k * (x - W[v])[0]
+            W[v] = W[v] + (self.alpha_fun(s, self.a_0, 0.7) * k * (x[0] - W[v]))
