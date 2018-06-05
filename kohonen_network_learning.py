@@ -1,7 +1,7 @@
 import numpy as np
 from scipy.stats import norm  # potrzebne do prostej i szybkiej implementacji funkcji Gaussa
 import copy  # używane do głębokich kopii sieci
-
+import helpers
 
 # funktor pozwalający na ustawienie i potem zawsze zwracanie wartości funkcji Gaussa dla nastaw i danego punktu,
 # zawsze zwraca wartość z 1 w mean - służy do liczenia wpływu odległości
@@ -24,17 +24,6 @@ class KohonenNetworkGauss_nbh:
         self.dist_0 = dist_0
         self.a_0 = alpha_0
 
-    # funcja zwracająca indeksy danych w losowej kolejności by móc później "karmić" sieć danymi w losowej kolejności
-    def randomize_data_indexes(self):
-        one = list(range(0, len(self.data)))
-        second = list(np.random.rand(len(self.data)))
-        x = np.concatenate((np.array([one]), np.array([second])), axis=0)
-        lista = []
-        for el in x.transpose():
-            lista.append((el[0], el[1]))
-        lista.sort(key=lambda x: x[1])
-        return list(map(lambda el: int(el[0]), lista))
-
     # główna część - algorytm uczenia się
     # BMU - indeks najsilniej odpowiadającego neuronu
     def learning(self, number_of_epochs):
@@ -43,7 +32,7 @@ class KohonenNetworkGauss_nbh:
         remember_network = [copy.deepcopy(self.network), ]
 
         for epoch in range(number_of_epochs):
-            for index in self.randomize_data_indexes():
+            for index in helpers.random_indexes(self.data):
                 x = self.data[index].reshape(1, len(self.data[0]))
                 s = epoch / number_of_epochs
                 if (self.by_dot_product):

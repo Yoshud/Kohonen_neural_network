@@ -19,11 +19,17 @@ DATA_LABELS = {
 
 def load_data():
     with open("data.csv", newline='') as data_csv:
-        data_read = csv.reader(data_csv, delimiter=',', quotechar='|')
-        a = np.array(list(list(data_read)))
+        # data_read = csv.reader(data_csv, delimiter=',', quotechar='|')
+        # a = np.array(list(list(data_read)))
         a_pd = pd.read_csv("data.csv", sep=",")
         a_pd = parser(a_pd)
         return a_pd.T
+
+def load_data_standaryzation():
+    with open("data.csv", newline='') as data_csv:
+        a_pd = pd.read_csv("data.csv", sep=",")
+        a_pd = parser_standaryzation(a_pd)
+        return a_pd
 
 
 def parser(data):
@@ -31,9 +37,23 @@ def parser(data):
         "class"] else normalize(col) for it, col in enumerate(np.array(data.T))])
 
 
+def parser_standaryzation(data):
+    parsing_special = pd.DataFrame([parse_gender(col) if it == DATA_LABELS["gender"] else parse_class(col) if it == DATA_LABELS[
+        "class"] else normalize(col) for it, col in enumerate(np.array(data.T))])
+
+    return standaryzation(parsing_special)
+
+
 def normalize(row):
     max_v = max(row)
     return list(map(lambda el, max_v=max_v: el / max_v, row))
+
+
+def standaryzation(data):
+    data = data.transpose()
+    mean = data.mean(axis=0)
+    std = data.std(axis=0)
+    return (data - mean) / (std + 0.000001)
 
 
 def parse_gender(row):

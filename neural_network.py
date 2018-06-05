@@ -31,13 +31,15 @@ class MultiLayerNetwork(NeuralNetwork):
     def compute(self, x):
         return reduce(lambda returned, layer: layer.compute(returned), self.layers, x)
 
-#Sieć typu SOM, ma zaimplementowany algorytm uczenia jej używający
-class Kohonen2DNetwork(NeuralNetwork):
-    def __init__(self, structure, attributes_in_data):
-        self.set_structure(structure, attributes_in_data)
 
-    def set_structure(self, structure, attributes_in_data):
-        self.layers = layer.Kohonen2DLayer(attributes_in_data, structure)
+# Sieć typu SOM, ma zaimplementowany algorytm uczenia jej używający
+class Kohonen2DNetwork(NeuralNetwork):
+    def __init__(self, structure, attributes_in_data, wage_initializer=None):
+        self.set_structure(structure, attributes_in_data, wage_initializer)
+
+    def set_structure(self, structure, attributes_in_data, wage_initializer=None):
+        self.layers = layer.Kohonen2DLayer(attributes_in_data, structure, wage_initializer) if wage_initializer is not None \
+            else layer.Kohonen2DLayer(attributes_in_data, structure)
 
 #
 #     def compute(self, x):
