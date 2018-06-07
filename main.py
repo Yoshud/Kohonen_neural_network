@@ -38,10 +38,13 @@ def parser(data):
 
 
 def parser_standaryzation(data):
+    data_c = np.array(data.T)[10]-1
     parsing_special = pd.DataFrame([parse_gender(col) if it == DATA_LABELS["gender"] else parse_class(col) if it == DATA_LABELS[
         "class"] else normalize(col) for it, col in enumerate(np.array(data.T))])
 
-    return standaryzation(parsing_special)
+    ret = standaryzation(parsing_special)
+    ret[10] = data_c
+    return ret
 
 
 def normalize(row):
@@ -53,6 +56,7 @@ def standaryzation(data):
     data = data.transpose()
     mean = data.mean(axis=0)
     std = data.std(axis=0)
+    # print((data - mean) / (std + 0.000001))
     return (data - mean) / (std + 0.000001)
 
 
