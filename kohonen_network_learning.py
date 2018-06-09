@@ -29,7 +29,11 @@ class AlphaFun(DecreasingFunction):
         self.a_0 = alpha_0
 
     def val(self, x):
-        return self.a_0 * np.exp(self.t - self.t / (1 - x)) if x != 1 else 0.
+        try:
+            len(x)  # czy cos po czym mozna iterowac
+            return [ self.a_0 * np.exp(self.t - self.t / (1 - el)) if el != 1 else 0 for el in x]
+        except TypeError:
+            return self.a_0 * np.exp(self.t - self.t / (1 - x)) if x != 1 else 0.
 
 
 class DecreasingDistFun(AlphaFun):
